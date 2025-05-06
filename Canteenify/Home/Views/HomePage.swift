@@ -3,6 +3,7 @@ import SwiftData
 
 struct HomePage: View {
     @Environment(\.modelContext) private var modelContext
+    @State private var homeViewModel = HomeViewModel()
     @Query(sort: \OrderItem.orderNumberTail, order: .reverse, animation: .default) var orders: [OrderItem]
     
     @State private var path = [OrderItem]()
@@ -52,7 +53,7 @@ struct HomePage: View {
                     }
                 }
             }
-            BottomActions()
+            BottomActions(viewModel: homeViewModel)
         }
     }
 }

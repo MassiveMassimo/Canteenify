@@ -2,12 +2,11 @@ import SwiftUI
 import PhotosUI
 
 struct BottomActions: View {
-    // State for photo picker
+    @Bindable var viewModel: HomePage.HomeViewModel
+    
+    // State for UI
     @State private var isShowingCamera = false
     @State private var galleryPickerItem: PhotosPickerItem?
-    
-    // Callback for when an image is selected
-    var onReceiptImageSelected: ((Data) -> Void)?
     
     var body: some View {
         VStack {
@@ -62,18 +61,23 @@ struct BottomActions: View {
         .onChange(of: galleryPickerItem) { _, newValue in
             Task {
                 if let data = try? await newValue?.loadTransferable(type: Data.self) {
-                    // Handle the image data on the main thread
+                    // Pass to the view model
                     await MainActor.run {
-                        onReceiptImageSelected?(data)
+                        viewModel.handleReceiptImageSelected(data)
                     }
                 }
                 // Reset the picker item
                 galleryPickerItem = nil
             }
         }
+        .sheet(isPresented: $isShowingCamera) {
+            // Create your camera view UI here
+            // When an image is captured:
+            // viewModel.handleReceiptImageSelected(imageData)
+        }
     }
 }
 
 #Preview {
-    BottomActions()
+    BottomActions(viewModel: HomePage.HomeViewModel())
 }
