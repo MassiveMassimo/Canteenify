@@ -11,7 +11,8 @@ import SwiftUI
 struct CanteenifyApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomePage()
+                .modelContainer(for: OrderItem.self)
         }
     }
 }
