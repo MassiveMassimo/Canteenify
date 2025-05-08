@@ -6,12 +6,11 @@ struct HomePage: View {
     @State private var homeViewModel = HomeViewModel()
     @Query(sort: \OrderItem.orderNumberTail, order: .reverse, animation: .default) var orders: [OrderItem]
     
-    @State private var path = [OrderItem]()
     @State private var tappedOrder: OrderItem?
     
     var body: some View {
         ZStack {
-            NavigationStack {
+//            NavigationStack {
                 List {
                     Section {
                         ForEach(orders) { order in
@@ -25,7 +24,7 @@ struct HomePage: View {
                             .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
                             .swipeActions(edge: .leading, allowsFullSwipe: false) {
                                 Button {
-                                    print("Right on!")
+                                    print("deleting order \(order.id)")
                                 } label: {
                                     Image(systemName: "trash")
                                 }
@@ -35,9 +34,9 @@ struct HomePage: View {
                     }
                 }
                 .listStyle(.plain)
-                .navigationDestination(item: $tappedOrder) { order in
-                    Text("Order #\(order.orderNumberTail)")
-                }
+//                .navigationDestination(item: $tappedOrder) { order in
+//                    Text("Order #\(order.orderNumberTail)")
+//                }
                 .toolbar {
                     ToolbarItem(placement: .principal) {
                         VStack(spacing: 2) {
@@ -52,7 +51,24 @@ struct HomePage: View {
                         }
                     }
                 }
-            }
+                .overlay {
+                    if homeViewModel.isProcessing {
+                        VStack {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                            Text("Processing receipt...")
+                                .font(.headline)
+                                .padding(.top)
+                        }
+                        .frame(width: 200, height: 120)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(.ultraThinMaterial)
+                        )
+                        .shadow(radius: 10)
+                    }
+                }
+//            }
             BottomActions(viewModel: homeViewModel)
         }
     }

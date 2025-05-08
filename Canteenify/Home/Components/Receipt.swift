@@ -3,8 +3,6 @@ import SwiftUI
 struct Receipt: View {
     let order: OrderItem
     
-    @Environment(\.colorScheme) private var colorScheme
-    
     var body: some View {
         HStack(spacing: 0) {
             HStack(alignment: .center) {
@@ -17,7 +15,7 @@ struct Receipt: View {
                             .padding(.bottom, 4)
                             .fixedSize()
                         Text("\(order.orderNumberTail)")
-                            .font(.system(size: 32))
+                            .font(.system(size: 32, design: .monospaced))
                             .fontWeight(.semibold)
                             .fixedSize()
                     }
@@ -44,7 +42,7 @@ struct Receipt: View {
                         .foregroundStyle(.secondary)
                         .padding(.bottom, 2)
                     Text(formattedPrice)
-                        .font(.system(size: 20))
+                        .font(.system(size: 20, design: .monospaced))
                         .fontWeight(.semibold)
                         .lineLimit(1)
                 }
@@ -80,19 +78,26 @@ struct Receipt: View {
     private var actionButton: some View {
         switch order.verificationStatus {
         case .verified:
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 28))
-                .foregroundColor(.green)
-                .frame(width: 48, height: 48)
-                .background(LinearGradient(
-                    stops: [
-                        Gradient.Stop(color: Constants.gray200, location: 0.00),
-                        Gradient.Stop(color: .white, location: 1.00),
-                    ],
-                    startPoint: UnitPoint(x: 0.5, y: 0),
-                    endPoint: UnitPoint(x: 0.5, y: 1)
-                ))
-                .clipShape(Circle())
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            stops: [
+                                Gradient.Stop(color: Constants.gray200, location: 0.00),
+                                Gradient.Stop(color: .white, location: 1.00),
+                            ],
+                            startPoint: UnitPoint(x: 0.5, y: 0),
+                            endPoint: UnitPoint(x: 0.5, y: 1)
+                        )
+                    )
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(.green)
+                    .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
+                    .shadow(color: .black.opacity(0.02), radius: 3, x: 0, y: 0)
+            }
         case .pending:
             Button(action: {
             }) {
@@ -100,9 +105,11 @@ struct Receipt: View {
                     .font(.system(size: 20))
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
-                    .frame(width: 48, height: 48)
+                    .frame(width: 44, height: 44)
                     .background(Constants.amber400)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
+                    .shadow(color: .black.opacity(0.02), radius: 3, x: 0, y: 0)
             }
         case .mismatch:
             Button(action: {
@@ -111,9 +118,11 @@ struct Receipt: View {
                     .font(.system(size: 20))
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
-                    .frame(width: 48, height: 48)
+                    .frame(width: 44, height: 44)
                     .background(Constants.red400)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 2)
+                    .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 0)
             }
         }
     }

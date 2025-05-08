@@ -70,10 +70,18 @@ struct BottomActions: View {
                 galleryPickerItem = nil
             }
         }
-        .sheet(isPresented: $isShowingCamera) {
-            // Create your camera view UI here
-            // When an image is captured:
-            // viewModel.handleReceiptImageSelected(imageData)
+        .overlay {
+            if isShowingCamera {
+                FullScreenCameraView(
+                    onImageCaptured: { imageData in
+                        if let imageData = imageData {
+                            viewModel.handleReceiptImageSelected(imageData)
+                        }
+                    },
+                    isPresented: $isShowingCamera
+                )
+                .ignoresSafeArea()
+            }
         }
     }
 }
