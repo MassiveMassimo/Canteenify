@@ -6,6 +6,7 @@ extension HomePage {
     class HomeViewModel {
         // MARK: - Dependencies
         private let imageProcessingService: ImageProcessingService
+        private let llmService = LLMService()
         
         // MARK: - State
         var receiptImageData: Data?
@@ -49,8 +50,7 @@ extension HomePage {
                 extractedText = text
                 print(text)
                 
-                // In the future, this is where you would call the LLM service
-                // await processWithLLM(text)
+                 await processWithLLM(text)
                 
             } catch {
                 processingError = error
@@ -58,10 +58,15 @@ extension HomePage {
             }
         }
         
-        // To be implemented in the future
-        // private func processWithLLM(_ text: String) async {
-        //     // Process with LLM and populate the order fields
-        // }
+        private func processWithLLM(_ text: String) async {
+            guard let llmService = llmService else {
+                print("LLM Service not available")
+                return
+            }
+
+            let response = llmService.predict(text: text)
+            print("LLM Response: \(response)")
+        }
         
         func createOrderItem(modelContext: ModelContext) -> OrderItem? {
             guard !orderNumber.isEmpty, price > 0 else { return nil }

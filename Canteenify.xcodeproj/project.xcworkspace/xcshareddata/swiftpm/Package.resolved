@@ -1,0 +1,15 @@
+{
+  "originHash" : "112af3bd1d49d8a2d3d4318fbf52f6f33a6e4093a381c95a57d35802b5328ccf",
+  "pins" : [
+    {
+      "identity" : "swifttokenizer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RayKitajima/SwiftTokenizer",
+      "state" : {
+        "branch" : "main",
+        "revision" : "0763d962b4dc95d349b822b34254976d4fff8065"
+      }
+    }
+  ],
+  "version" : 3
+}

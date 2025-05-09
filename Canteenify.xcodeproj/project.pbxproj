@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B1A1D6BF2DCE5685004B2095 /* SwiftTokenizer in Frameworks */ = {isa = PBXBuildFile; productRef = B1A1D6BE2DCE5685004B2095 /* SwiftTokenizer */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		B17FB7FD2DC5037700D6D11E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1A1D6BF2DCE5685004B2095 /* SwiftTokenizer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = Canteenify;
 			packageProductDependencies = (
+				B1A1D6BE2DCE5685004B2095 /* SwiftTokenizer */,
 			);
 			productName = Canteenify;
 			productReference = B17FB7EF2DC5037600D6D11E /* Canteenify.app */;
@@ -196,6 +202,7 @@
 			mainGroup = B17FB7E62DC5037600D6D11E;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				B1A1D6BD2DCE5685004B2095 /* XCRemoteSwiftPackageReference "SwiftTokenizer" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B17FB7F02DC5037600D6D11E /* Products */;
@@ -564,6 +571,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B1A1D6BD2DCE5685004B2095 /* XCRemoteSwiftPackageReference "SwiftTokenizer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RayKitajima/SwiftTokenizer";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B1A1D6BE2DCE5685004B2095 /* SwiftTokenizer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1A1D6BD2DCE5685004B2095 /* XCRemoteSwiftPackageReference "SwiftTokenizer" */;
+			productName = SwiftTokenizer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B17FB7E72DC5037600D6D11E /* Project object */;
 }
