@@ -1,7 +1,10 @@
 import SwiftUI
 
 struct Receipt: View {
+    
+    @Environment(\.dismiss) var dismiss
     let order: OrderItem
+    var namespace: Namespace.ID
     
     var body: some View {
         HStack(spacing: 0) {
@@ -14,10 +17,12 @@ struct Receipt: View {
                             .foregroundStyle(.secondary)
                             .padding(.bottom, 4)
                             .fixedSize()
+//                            .matchedTransitionSource(id: "num-\(order.id)", in: namespace)
                         Text("\(order.orderNumberTail)")
                             .font(.system(size: 32, design: .monospaced))
                             .fontWeight(.semibold)
                             .fixedSize()
+//                            .matchedTransitionSource(id: "number-\(order.id)", in: namespace)
                     }
                     Label {
                         Text(order.verificationStatus.rawValue.lowercased())
@@ -25,6 +30,7 @@ struct Receipt: View {
                             .fontWeight(.medium)
                             .lineLimit(1)
                             .fixedSize()
+//                            .matchedTransitionSource(id: "status-text-\(order.id)", in: namespace)
                     } icon: {
                         EmptyView()
                     }
@@ -33,6 +39,7 @@ struct Receipt: View {
                     .background(statusGradient)
                     .cornerRadius(9999)
                     .foregroundColor(statusTextColor)
+//                    .matchedTransitionSource(id: "status-badge-\(order.id)", in: namespace)
                 }
                 Spacer()
                 HStack(alignment: .bottom, spacing: 4) {
@@ -41,10 +48,12 @@ struct Receipt: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary)
                         .padding(.bottom, 2)
+//                        .matchedTransitionSource(id: "rp-\(order.id)", in: namespace)
                     Text(formattedPrice)
                         .font(.system(size: 20, design: .monospaced))
                         .fontWeight(.semibold)
                         .lineLimit(1)
+//                        .matchedTransitionSource(id: "price-\(order.id)", in: namespace)
                 }
             }
             .padding(.horizontal, 20)
@@ -59,10 +68,14 @@ struct Receipt: View {
                     startPoint: UnitPoint(x: 0.5, y: 0),
                     endPoint: UnitPoint(x: 0.5, y: 1)
                 )
+//                .matchedTransitionSource(id: "background-\(order.id)", in: namespace)
             )
             .clipShape(PerforatedEdges(), style: FillStyle(eoFill: true))
+            .matchedTransitionSource(id: order.id, in: namespace)
             .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
             .shadow(color: .black.opacity(0.02), radius: 3, x: 0, y: 0)
+            
+            // Action section doesn't need to be part of the transition
             actionButton
                 .padding(.horizontal, 16)
                 .frame(maxHeight: .infinity)
@@ -73,9 +86,11 @@ struct Receipt: View {
         .padding(0)
         .frame(maxWidth: .infinity, maxHeight: 72, alignment: .topLeading)
     }
-    
+}
+
+private extension Receipt {
     @ViewBuilder
-    private var actionButton: some View {
+    var actionButton: some View {
         switch order.verificationStatus {
         case .verified:
             ZStack {
@@ -126,9 +141,6 @@ struct Receipt: View {
             }
         }
     }
-}
-
-private extension Receipt {
     var formattedPrice: String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
@@ -237,32 +249,32 @@ struct PerforatedEdges: Shape {
     }
 }
 
-#Preview{
-    VStack(spacing: 16) {
-        Receipt(order: OrderItem(
-            orderNumber: "ORD-123",
-            dateTime: Date(),
-            price: 24000,
-            dishes: ["Sample Dish"],
-            verificationStatus: .pending
-        ))
-        
-        Receipt(order: OrderItem(
-            orderNumber: "ORD-2",
-            dateTime: Date(),
-            price: 23000,
-            dishes: ["Sample Dish"],
-            verificationStatus: .verified
-        ))
-        
-        Receipt(order: OrderItem(
-            orderNumber: "ORD-6",
-            dateTime: Date(),
-            price: 28000,
-            dishes: ["Sample Dish"],
-            verificationStatus: .mismatch
-        ))
-    }
-    .padding()
-    
-}
+//#Preview{
+//    @Namespace var previewNamespace
+//    VStack(spacing: 16) {
+//        Receipt(order: OrderItem(
+//            orderNumber: "ORD-123",
+//            dateTime: Date(),
+//            price: 24000,
+//            dishes: ["Sample Dish"],
+//            verificationStatus: .pending
+//        ), namespace: previewNamespace)
+//
+//        Receipt(order: OrderItem(
+//            orderNumber: "ORD-2",
+//            dateTime: Date(),
+//            price: 23000,
+//            dishes: ["Sample Dish"],
+//            verificationStatus: .verified
+//        ), namespace: previewNamespace)
+//
+//        Receipt(order: OrderItem(
+//            orderNumber: "ORD-6",
+//            dateTime: Date(),
+//            price: 28000,
+//            dishes: ["Sample Dish"],
+//            verificationStatus: .mismatch
+//        ), namespace: previewNamespace)
+//    }
+//    .padding()
+//}

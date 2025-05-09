@@ -4,20 +4,26 @@ import SwiftData
 struct HomePage: View {
     @Environment(\.modelContext) private var modelContext
     @State private var homeViewModel = HomeViewModel()
-    @Query(sort: \OrderItem.orderNumberTail, order: .reverse, animation: .default) var orders: [OrderItem]
+    @Namespace private var namespace
     
-    @State private var tappedOrder: OrderItem?
+    @Query(sort: \OrderItem.orderNumberTail, order: .reverse, animation: .default) var orders: [OrderItem]
     
     var body: some View {
         ZStack {
-//            NavigationStack {
+            NavigationStack {
                 List {
                     Section {
                         ForEach(orders) { order in
-                            Button {
-                                tappedOrder = order
-                            } label: {
-                                Receipt(order: order)
+                            ZStack {
+                                Receipt(order: order, namespace: namespace)
+                                    .contentShape(Rectangle())
+                                NavigationLink {
+                                    OrderDetailsPage(order: order)
+                                        .navigationTransition(.zoom(sourceID: order.id, in: namespace))
+                                } label: {
+                                    EmptyView()
+                                }
+                                .opacity(0)
                             }
                             .tint(.black)
                             .listRowSeparator(.hidden)
@@ -31,26 +37,28 @@ struct HomePage: View {
                                 .tint(.red)
                             }
                         }
+                        Spacer()
+                            .frame(height: 120)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                     }
                 }
                 .listStyle(.plain)
-//                .navigationDestination(item: $tappedOrder) { order in
-//                    Text("Order #\(order.orderNumberTail)")
-//                }
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        VStack(spacing: 2) {
-                            Text("Canteenify")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .multilineTextAlignment(.center)
-                            
-                            Text("\(Date.now.formatted(date: .abbreviated, time: .omitted)) | \(orders.count) orders")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
+                .navigationTitle("Canteenify")
+                //                .toolbar {
+                //                    ToolbarItem(placement: .principal) {
+                //                        VStack(spacing: 2) {
+                //                            Text("Canteenify")
+                //                                .font(.title3)
+                //                                .fontWeight(.bold)
+                //                                .multilineTextAlignment(.center)
+                //
+                //                            Text("\(Date.now.formatted(date: .abbreviated, time: .omitted)) | \(orders.count) orders")
+                //                                .font(.subheadline)
+                //                                .foregroundStyle(.secondary)
+                //                        }
+                //                    }
+                //                }
                 .overlay {
                     if homeViewModel.isProcessing {
                         VStack {
@@ -68,7 +76,7 @@ struct HomePage: View {
                         .shadow(radius: 10)
                     }
                 }
-//            }
+            }
             BottomActions(viewModel: homeViewModel)
         }
     }
