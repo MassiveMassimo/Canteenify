@@ -1,10 +1,3 @@
-//
-//  CanteenifyApp.swift
-//  Canteenify
-//
-//  Created by Imo Madjid on 5/2/25.
-//
-
 import SwiftUI
 
 @main

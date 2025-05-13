@@ -1,6 +1,11 @@
 import SwiftUI
 import SwiftData
 
+struct Dishes: Codable {
+    let name: String
+    let price: Double
+}
+
 @Model
 final class OrderItem {
     var orderNumber: String
@@ -9,7 +14,7 @@ final class OrderItem {
     var price: Double
     @Attribute(.externalStorage) var receiptImage: Data?
     @Attribute(.externalStorage) var proofImage: Data?
-    var dishes: [String]
+    var dishes: [Dishes]
     var verificationStatus: VerificationStatus
     var createdAt: Date
     var restaurantName: String
@@ -21,7 +26,7 @@ final class OrderItem {
         price: Double,
         receiptImage: Data? = nil,
         proofImage: Data? = nil,
-        dishes: [String],
+        dishes: [Dishes],
         verificationStatus: VerificationStatus,
         restaurantName: String = "",
         paymentMethod: String = ""
@@ -73,16 +78,52 @@ final class OrderItem {
 extension OrderItem {
     static var sampleOrders: [OrderItem] {
         [
-            OrderItem(orderNumber: "POS-080425-1", dateTime: Date().addingTimeInterval(-3600), price: 45000, dishes: ["Daging Lada Hitam", "Nasi Putih 1 Porsi", "Es Teh Manis"], verificationStatus: .verified, restaurantName: "Warung Nusantara"),
-            OrderItem(orderNumber: "POS-080425-2", dateTime: Date().addingTimeInterval(-4200), price: 38000, dishes: ["Ayam Geprek", "Nasi Putih"], verificationStatus: .pending, restaurantName: "Ayam Geprek Maknyus"),
-            OrderItem(orderNumber: "POS-080425-3", dateTime: Date().addingTimeInterval(-4800), price: 52000, dishes: ["Sate Ayam", "Lontong", "Teh Tawar"], verificationStatus: .mismatch, restaurantName: "Sate Pak Gino"),
-            OrderItem(orderNumber: "POS-080425-4", dateTime: Date().addingTimeInterval(-5400), price: 60000, dishes: ["Bakso Urat", "Es Campur"], verificationStatus: .verified, restaurantName: "Bakso Malang Jaya"),
-            OrderItem(orderNumber: "POS-080425-5", dateTime: Date().addingTimeInterval(-6000), price: 29000, dishes: ["Nasi Goreng", "Kerupuk"], verificationStatus: .pending, restaurantName: "Nasi Goreng Bang Jo"),
-            OrderItem(orderNumber: "POS-080425-6", dateTime: Date().addingTimeInterval(-6600), price: 47000, dishes: ["Mie Ayam", "Es Jeruk"], verificationStatus: .mismatch, restaurantName: "Mie Ayam Tumini"),
-            OrderItem(orderNumber: "POS-080425-7", dateTime: Date().addingTimeInterval(-7200), price: 88000, dishes: ["Ikan Bakar", "Nasi Uduk", "Lalapan", "Sambal"], verificationStatus: .verified, restaurantName: "Pondok Ikan Bakar"),
-            OrderItem(orderNumber: "POS-080425-8", dateTime: Date().addingTimeInterval(-7800), price: 32000, dishes: ["Lontong Sayur", "Teh Manis"], verificationStatus: .pending, restaurantName: "Lontong Sayur Hj. Siti"),
-            OrderItem(orderNumber: "POS-080425-9", dateTime: Date().addingTimeInterval(-8400), price: 56000, dishes: ["Ayam Bakar", "Sayur Asem", "Nasi Putih"], verificationStatus: .mismatch, restaurantName: "Warung Betawi Asli"),
-            OrderItem(orderNumber: "POS-080425-10", dateTime: Date().addingTimeInterval(-9000), price: 73000, dishes: ["Sop Buntut", "Nasi", "Es Teh"], verificationStatus: .verified, restaurantName: "Restoran Nusantara")
+            OrderItem(orderNumber: "POS-080425-1", dateTime: Date().addingTimeInterval(-3600), price: 45000, dishes: [
+                Dishes(name: "Daging Lada Hitam", price: 20000),
+                Dishes(name: "Nasi Putih 1 Porsi", price: 10000),
+                Dishes(name: "Es Teh Manis", price: 15000)
+            ], verificationStatus: .verified, restaurantName: "Warung Nusantara"),
+            OrderItem(orderNumber: "POS-080425-2", dateTime: Date().addingTimeInterval(-4200), price: 38000, dishes: [
+                Dishes(name: "Ayam Geprek", price: 25000),
+                Dishes(name: "Nasi Putih", price: 13000)
+            ], verificationStatus: .pending, restaurantName: "Ayam Geprek Maknyus"),
+            OrderItem(orderNumber: "POS-080425-3", dateTime: Date().addingTimeInterval(-4800), price: 52000, dishes: [
+                Dishes(name: "Sate Ayam", price: 30000),
+                Dishes(name: "Lontong", price: 12000),
+                Dishes(name: "Teh Tawar", price: 10000)
+            ], verificationStatus: .mismatch, restaurantName: "Sate Pak Gino"),
+            OrderItem(orderNumber: "POS-080425-4", dateTime: Date().addingTimeInterval(-5400), price: 60000, dishes: [
+                Dishes(name: "Bakso Urat", price: 35000),
+                Dishes(name: "Es Campur", price: 25000)
+            ], verificationStatus: .verified, restaurantName: "Bakso Malang Jaya"),
+            OrderItem(orderNumber: "POS-080425-5", dateTime: Date().addingTimeInterval(-6000), price: 29000, dishes: [
+                Dishes(name: "Nasi Goreng", price: 20000),
+                Dishes(name: "Kerupuk", price: 9000)
+            ], verificationStatus: .pending, restaurantName: "Nasi Goreng Bang Jo"),
+            OrderItem(orderNumber: "POS-080425-6", dateTime: Date().addingTimeInterval(-6600), price: 47000, dishes: [
+                Dishes(name: "Mie Ayam", price: 30000),
+                Dishes(name: "Es Jeruk", price: 17000)
+            ], verificationStatus: .mismatch, restaurantName: "Mie Ayam Tumini"),
+            OrderItem(orderNumber: "POS-080425-7", dateTime: Date().addingTimeInterval(-7200), price: 88000, dishes: [
+                Dishes(name: "Ikan Bakar", price: 40000),
+                Dishes(name: "Nasi Uduk", price: 15000),
+                Dishes(name: "Lalapan", price: 15000),
+                Dishes(name: "Sambal", price: 18000)
+            ], verificationStatus: .verified, restaurantName: "Pondok Ikan Bakar"),
+            OrderItem(orderNumber: "POS-080425-8", dateTime: Date().addingTimeInterval(-7800), price: 32000, dishes: [
+                Dishes(name: "Lontong Sayur", price: 22000),
+                Dishes(name: "Teh Manis", price: 10000)
+            ], verificationStatus: .pending, restaurantName: "Lontong Sayur Hj. Siti"),
+            OrderItem(orderNumber: "POS-080425-9", dateTime: Date().addingTimeInterval(-8400), price: 56000, dishes: [
+                Dishes(name: "Ayam Bakar", price: 30000),
+                Dishes(name: "Sayur Asem", price: 12000),
+                Dishes(name: "Nasi Putih", price: 14000)
+            ], verificationStatus: .mismatch, restaurantName: "Warung Betawi Asli"),
+            OrderItem(orderNumber: "POS-080425-10", dateTime: Date().addingTimeInterval(-9000), price: 73000, dishes: [
+                Dishes(name: "Sop Buntut", price: 40000),
+                Dishes(name: "Nasi", price: 15000),
+                Dishes(name: "Es Teh", price: 18000)
+            ], verificationStatus: .verified, restaurantName: "Restoran Nusantara")
         ]
     }
 }

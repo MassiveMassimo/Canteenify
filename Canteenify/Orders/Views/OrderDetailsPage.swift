@@ -99,8 +99,8 @@ struct OrderDetailsPage: View {
                     }
                     
                     detailSection(title: "Items") {
-                        ForEach(order.dishes, id: \.self) { dish in
-                            Text("• \(dish)")
+                        ForEach(order.dishes, id: \.name) { dish in
+                            Text("• \(dish.name) – Rp\(Int(dish.price))")
                                 .padding(.vertical, 4)
                         }
                         
@@ -241,7 +241,10 @@ struct OrderDetailsPage_Previews: PreviewProvider {
             price: 25000,
             receiptImage: nil,
             proofImage: nil,
-            dishes: ["Nasi Goreng", "Es Teh"],
+            dishes: [
+                Dishes(name: "Nasi Goreng", price: 15000),
+                Dishes(name: "Es Teh", price: 10000)
+            ],
             verificationStatus: .verified,
             restaurantName: "Warung Makan Sederhana",
             paymentMethod: "Cash"

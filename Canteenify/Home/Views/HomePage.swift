@@ -30,7 +30,9 @@ struct HomePage: View {
                             .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
                             .swipeActions(edge: .leading, allowsFullSwipe: false) {
                                 Button {
-                                    print("deleting order \(order.id)")
+                                    // Add actual delete functionality
+                                    modelContext.delete(order)
+                                    try? modelContext.save()
                                 } label: {
                                     Image(systemName: "trash")
                                 }
@@ -45,39 +47,12 @@ struct HomePage: View {
                 }
                 .listStyle(.plain)
                 .navigationTitle("Canteenify")
-                //                .toolbar {
-                //                    ToolbarItem(placement: .principal) {
-                //                        VStack(spacing: 2) {
-                //                            Text("Canteenify")
-                //                                .font(.title3)
-                //                                .fontWeight(.bold)
-                //                                .multilineTextAlignment(.center)
-                //
-                //                            Text("\(Date.now.formatted(date: .abbreviated, time: .omitted)) | \(orders.count) orders")
-                //                                .font(.subheadline)
-                //                                .foregroundStyle(.secondary)
-                //                        }
-                //                    }
-                //                }
-                .overlay {
-                    if homeViewModel.isProcessing {
-                        VStack {
-                            ProgressView()
-                                .scaleEffect(1.5)
-                            Text("Processing receipt...")
-                                .font(.headline)
-                                .padding(.top)
-                        }
-                        .frame(width: 200, height: 120)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(.ultraThinMaterial)
-                        )
-                        .shadow(radius: 10)
-                    }
-                }
             }
             BottomActions(viewModel: homeViewModel)
+        }
+        .processingOverlay(isShowing: homeViewModel.isProcessing, imageData: homeViewModel.receiptImageData)
+        .onAppear {
+            homeViewModel.setModelContext(modelContext)
         }
     }
 }
