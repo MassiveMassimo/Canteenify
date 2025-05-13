@@ -6,13 +6,18 @@ extension HomePage {
     class HomeViewModel {
         // MARK: - Dependencies
         private let imageProcessingService: ImageProcessingService
-        private let llmService = LLMService()
+        private let llmService: LLMServiceProtocol
         
         // MARK: - State
         var receiptImageData: Data?
         var extractedText: String?
         var isProcessing: Bool = false
         var processingError: Error?
+        
+        // Add LLM response state
+        var llmResponse: String?
+        var isProcessingLLM: Bool = false
+        var llmError: Error?
         
         // MARK: - OrderItem fields
         var orderNumber: String = ""
@@ -23,15 +28,21 @@ extension HomePage {
         var paymentMethod: String = ""
         
         // MARK: - Initialization
-        init(imageProcessingService: ImageProcessingService = VisionImageProcessingService()) {
+        init(
+            imageProcessingService: ImageProcessingService = VisionImageProcessingService(),
+            llmService: LLMServiceProtocol = LLMService()
+        ) {
             self.imageProcessingService = imageProcessingService
+            self.llmService = llmService
         }
         
         // MARK: - Actions
         func handleReceiptImageSelected(_ imageData: Data) {
             receiptImageData = imageData
             extractedText = nil
+            llmResponse = nil
             processingError = nil
+            llmError = nil
             
             Task {
                 await processReceiptImage()
@@ -43,29 +54,47 @@ extension HomePage {
             guard let imageData = receiptImageData else { return }
             
             isProcessing = true
-            defer { isProcessing = false }
             
             do {
                 let text = try await imageProcessingService.extractText(from: imageData)
                 extractedText = text
+                print("Extracted Text (\(text.count) characters):")
                 print(text)
                 
-                 await processWithLLM(text)
+                // Generate LLM response
+                isProcessingLLM = true
+                
+                let prompt = """
+                Extract the following information from this receipt:
+                - Order Number
+                - Date and Time
+                - Total Price
+                - Restaurant Name
+                - Items Ordered
+                - Payment Method
+                
+                Here is the receipt text:
+                \(text)
+                
+                Answer:
+                """
+                
+                llmResponse = await llmService.generateResponse(from: prompt)
+                isProcessingLLM = false
+                
+                if let response = llmResponse {
+                    print("LLM Response:")
+                    print(response)
+                } else {
+                    print("No LLM response generated")
+                }
                 
             } catch {
                 processingError = error
                 print("Error processing receipt: \(error.localizedDescription)")
             }
-        }
-        
-        private func processWithLLM(_ text: String) async {
-            guard let llmService = llmService else {
-                print("LLM Service not available")
-                return
-            }
-
-            let response = llmService.predict(text: text)
-            print("LLM Response: \(response)")
+            
+            isProcessing = false
         }
         
         func createOrderItem(modelContext: ModelContext) -> OrderItem? {
@@ -77,7 +106,7 @@ extension HomePage {
                 price: price,
                 receiptImage: receiptImageData,
                 proofImage: nil,
-                dishes: dishes.filter { !$0.isEmpty },
+                dishes: dishes,
                 verificationStatus: .pending,
                 restaurantName: restaurantName,
                 paymentMethod: paymentMethod
