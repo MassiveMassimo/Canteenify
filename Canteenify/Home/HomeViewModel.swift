@@ -3,7 +3,7 @@ import SwiftData
 
 extension HomePage {
     @Observable
-    class HomeViewModel {
+    class ViewModel {
         // MARK: - Dependencies
         private let imageProcessingService: ImageProcessingService
         private let llmService: LLMServiceProtocol

@@ -1,10 +1,16 @@
 import SwiftUI
+import PhotosUI
 
 struct Receipt: View {
     
-    @Environment(\.dismiss) var dismiss
     let order: OrderItem
+    @Bindable var viewModel: HomePage.ViewModel
     var namespace: Namespace.ID
+    
+    @State private var isShowingCamera: Bool = false
+    @State private var galleryPickerItem: PhotosPickerItem?
+    @State private var showCDPending: Bool = false
+    @State private var showCDMismatch: Bool = false
     
     var body: some View {
         HStack(spacing: 0) {
@@ -12,17 +18,15 @@ struct Receipt: View {
                 HStack(alignment: .center, spacing: 8) {
                     HStack(alignment: .bottom, spacing: 4) {
                         Text("№")
-                            .font(.system(size: 18))
+                            .font(.system(size: 14))
                             .fontWeight(.semibold)
                             .foregroundStyle(.secondary)
                             .padding(.bottom, 4)
                             .fixedSize()
-//                            .matchedTransitionSource(id: "num-\(order.id)", in: namespace)
                         Text("\(order.orderNumberTail)")
-                            .font(.system(size: 32, design: .monospaced))
+                            .font(.system(size: 24, design: .monospaced))
                             .fontWeight(.semibold)
                             .fixedSize()
-//                            .matchedTransitionSource(id: "number-\(order.id)", in: namespace)
                     }
                     Label {
                         Text(order.verificationStatus.rawValue.lowercased())
@@ -30,7 +34,6 @@ struct Receipt: View {
                             .fontWeight(.medium)
                             .lineLimit(1)
                             .fixedSize()
-//                            .matchedTransitionSource(id: "status-text-\(order.id)", in: namespace)
                     } icon: {
                         EmptyView()
                     }
@@ -39,7 +42,6 @@ struct Receipt: View {
                     .background(statusGradient)
                     .cornerRadius(9999)
                     .foregroundColor(statusTextColor)
-//                    .matchedTransitionSource(id: "status-badge-\(order.id)", in: namespace)
                 }
                 Spacer()
                 HStack(alignment: .bottom, spacing: 4) {
@@ -48,12 +50,10 @@ struct Receipt: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary)
                         .padding(.bottom, 2)
-//                        .matchedTransitionSource(id: "rp-\(order.id)", in: namespace)
                     Text(formattedPrice)
                         .font(.system(size: 20, design: .monospaced))
                         .fontWeight(.semibold)
                         .lineLimit(1)
-//                        .matchedTransitionSource(id: "price-\(order.id)", in: namespace)
                 }
             }
             .padding(.horizontal, 20)
@@ -68,14 +68,12 @@ struct Receipt: View {
                     startPoint: UnitPoint(x: 0.5, y: 0),
                     endPoint: UnitPoint(x: 0.5, y: 1)
                 )
-//                .matchedTransitionSource(id: "background-\(order.id)", in: namespace)
             )
             .clipShape(PerforatedEdges(), style: FillStyle(eoFill: true))
             .matchedTransitionSource(id: order.id, in: namespace)
             .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
             .shadow(color: .black.opacity(0.02), radius: 3, x: 0, y: 0)
             
-            // Action section doesn't need to be part of the transition
             actionButton
                 .padding(.horizontal, 16)
                 .frame(maxHeight: .infinity)
@@ -85,6 +83,31 @@ struct Receipt: View {
         }
         .padding(0)
         .frame(maxWidth: .infinity, maxHeight: 72, alignment: .topLeading)
+        .onChange(of: galleryPickerItem) { _, newValue in
+            Task {
+                if let data = try? await newValue?.loadTransferable(type: Data.self) {
+                    // Pass to the view model
+                    await MainActor.run {
+                        viewModel.handleReceiptImageSelected(data)
+                    }
+                }
+                // Reset the picker item
+                galleryPickerItem = nil
+            }
+        }
+        .overlay {
+            if isShowingCamera {
+                FullScreenCameraView(
+                    onImageCaptured: { imageData in
+                        if let imageData = imageData {
+                            viewModel.handleReceiptImageSelected(imageData)
+                        }
+                    },
+                    isPresented: $isShowingCamera
+                )
+                .ignoresSafeArea()
+            }
+        }
     }
 }
 
@@ -115,6 +138,7 @@ private extension Receipt {
             }
         case .pending:
             Button(action: {
+                showCDPending = true
             }) {
                 Image(systemName: "doc.viewfinder")
                     .font(.system(size: 20))
@@ -126,8 +150,29 @@ private extension Receipt {
                     .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
                     .shadow(color: .black.opacity(0.02), radius: 3, x: 0, y: 0)
             }
+            .confirmationDialog(
+                "Scan Payment Proof",
+                isPresented: $showCDPending,
+                titleVisibility: .visible
+            ) {
+                Button("Take Photo") {
+                    isShowingCamera = true
+                }
+                
+                PhotosPicker(
+                    selection: $galleryPickerItem,
+                    matching: .images
+                ) {
+                    Text("Choose from Gallery")
+                }
+                
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Select how you would like to scan your payment proof")
+            }
         case .mismatch:
             Button(action: {
+                showCDMismatch = true
             }) {
                 Image(systemName: "arrow.counterclockwise")
                     .font(.system(size: 20))
@@ -139,8 +184,26 @@ private extension Receipt {
                     .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 2)
                     .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 0)
             }
+            .confirmationDialog(
+                "Rescan Document",
+                isPresented: $showCDMismatch,
+                titleVisibility: .visible
+            ) {
+                Button("Receipt") {
+                    
+                }
+                
+                Button("Payment Proof") {
+                    
+                }
+                
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Select which document you would like to rescan")
+            }
         }
     }
+    
     var formattedPrice: String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
@@ -249,32 +312,21 @@ struct PerforatedEdges: Shape {
     }
 }
 
-//#Preview{
-//    @Namespace var previewNamespace
-//    VStack(spacing: 16) {
-//        Receipt(order: OrderItem(
-//            orderNumber: "ORD-123",
-//            dateTime: Date(),
-//            price: 24000,
-//            dishes: ["Sample Dish"],
-//            verificationStatus: .pending
-//        ), namespace: previewNamespace)
-//
-//        Receipt(order: OrderItem(
-//            orderNumber: "ORD-2",
-//            dateTime: Date(),
-//            price: 23000,
-//            dishes: ["Sample Dish"],
-//            verificationStatus: .verified
-//        ), namespace: previewNamespace)
-//
-//        Receipt(order: OrderItem(
-//            orderNumber: "ORD-6",
-//            dateTime: Date(),
-//            price: 28000,
-//            dishes: ["Sample Dish"],
-//            verificationStatus: .mismatch
-//        ), namespace: previewNamespace)
-//    }
-//    .padding()
-//}
+#Preview {
+    @Previewable @State var viewModel = HomePage.ViewModel()
+    @Previewable @Namespace var previewNamespace
+    
+    let sampleOrders = OrderItem.sampleOrders
+    let previewOrders: [OrderItem] = [
+        sampleOrders.first(where: { $0.verificationStatus == .pending }),
+        sampleOrders.first(where: { $0.verificationStatus == .verified }),
+        sampleOrders.first(where: { $0.verificationStatus == .mismatch })
+    ].compactMap { $0 }
+    
+    VStack(spacing: 16) {
+        ForEach(previewOrders, id: \.id) { order in
+            Receipt(order: order, viewModel: viewModel, namespace: previewNamespace)
+        }
+    }
+    .padding()
+}

@@ -6,19 +6,17 @@ struct ProcessingOverlay: View {
     
     var body: some View {
         ZStack {
-            // Semi-transparent background
-            Color.black.opacity(0.5)
+            Rectangle()
+                .fill(.ultraThinMaterial)
                 .edgesIgnoringSafeArea(.all)
-                .opacity(isAnimated ? 0.7 : 0)
+                .opacity(isAnimated ? 1 : 0)
             
-            // Receipt image with processing overlay
             Group {
                 if let imageData = imageData, let uiImage = UIImage(data: imageData) {
                     Image(uiImage: uiImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 } else {
-                    // Fallback if image can't be loaded
                     Rectangle()
                         .fill(.gray.opacity(0.3))
                 }
@@ -27,39 +25,28 @@ struct ProcessingOverlay: View {
                 width: isAnimated ? 280 : UIScreen.main.bounds.width,
                 height: isAnimated ? 380 : UIScreen.main.bounds.height
             )
-            .clipShape(RoundedRectangle(cornerRadius: isAnimated ? 24 : 0))
-            .shadow(color: .black.opacity(0.3), radius: isAnimated ? 15 : 0, x: 0, y: 5)
             .overlay {
-                // Simplified mesh gradient overlay
                 animatedMeshGradient
                     .opacity(0.5)
-                    .clipShape(RoundedRectangle(cornerRadius: isAnimated ? 24 : 0))
-                
-                // Processing indicator
                 VStack {
                     Spacer()
-                    
-                    // Simplified indicator layout
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(.ultraThinMaterial)
-                            .frame(height: 90)
-                            .padding(.horizontal, 20)
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .scaleEffect(1.3)
+                            .tint(.white)
                         
-                        VStack(spacing: 12) {
-                            ProgressView()
-                                .scaleEffect(1.3)
-                                .tint(.white)
-                            
-                            Text("Processing receipt...")
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                        }
+                        Text("Processing receipt...")
+                            .font(.headline)
+                            .foregroundStyle(.white)
                     }
-                    .padding(.bottom, 30)
-                    .opacity(isAnimated ? 1 : 0)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(16)
                 }
+                .padding(8)
             }
+            .cornerRadius(isAnimated ? 24 : 0)
         }
         .onAppear {
             withAnimation(.spring(response: 2, dampingFraction: 0.7)) {
@@ -68,28 +55,27 @@ struct ProcessingOverlay: View {
         }
     }
     
-    // Extracted mesh gradient as a computed property
     private var animatedMeshGradient: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: 0.05, paused: false)) { timeline in
             let time = timeline.date.timeIntervalSince1970
             
             MeshGradient(
                 width: 3,
                 height: 3,
                 points: [
-                    // Top row
-                    [0, 0], [0.5, 0], [1, 0],
+                    SIMD2<Float>(0, 0),
+                    SIMD2<Float>(0.5 + 0.1 * Float(sin(time * 0.7)), 0),
+                    SIMD2<Float>(1, 0),
                     
-                    // Middle row with animated center point
-                    [0, 0.5],
-                    [0.5 + 0.2 * Float(sin(time)), 0.5 + 0.2 * Float(cos(time))],
-                    [1, 0.5],
+                    SIMD2<Float>(0, 0.5 + 0.1 * Float(sin(time * 0.8))),
+                    SIMD2<Float>(0.5 + 0.3 * Float(sin(time)), 0.5 + 0.3 * Float(cos(time))),
+                    SIMD2<Float>(1, 0.5 + 0.1 * Float(sin(time + 1))),
                     
-                    // Bottom row
-                    [0, 1], [0.5, 1], [1, 1]
+                    SIMD2<Float>(0, 1),
+                    SIMD2<Float>(0.5 + 0.1 * Float(cos(time * 0.9)), 1),
+                    SIMD2<Float>(1, 1)
                 ],
                 colors: [
-                    // Simplified color palette
                     .blue.opacity(0.7), .purple.opacity(0.7), .indigo.opacity(0.7),
                     .cyan.opacity(0.7), .teal.opacity(0.7), .mint.opacity(0.7),
                     .blue.opacity(0.7), .purple.opacity(0.7), .indigo.opacity(0.7)
@@ -116,14 +102,6 @@ extension View {
 
 #Preview {
     ZStack {
-        VStack {
-            Text("Background Content")
-                .font(.largeTitle)
-            
-            Text("This is the main app view behind the overlay")
-        }
-        
-        // For preview purposes, create a sample image
         ProcessingOverlay(imageData: UIImage(systemName: "doc.text.image")?.pngData())
     }
 }

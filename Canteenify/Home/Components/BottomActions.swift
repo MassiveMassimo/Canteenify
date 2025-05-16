@@ -2,9 +2,8 @@ import SwiftUI
 import PhotosUI
 
 struct BottomActions: View {
-    @Bindable var viewModel: HomePage.HomeViewModel
-    
-    // State for UI
+    @Bindable var viewModel: HomePage.ViewModel
+     
     @State private var isShowingCamera = false
     @State private var galleryPickerItem: PhotosPickerItem?
     
@@ -87,5 +86,5 @@ struct BottomActions: View {
 }
 
 #Preview {
-    BottomActions(viewModel: HomePage.HomeViewModel())
+    BottomActions(viewModel: HomePage.ViewModel())
 }

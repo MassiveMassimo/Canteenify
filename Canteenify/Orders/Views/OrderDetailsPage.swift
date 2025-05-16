@@ -2,7 +2,6 @@ import SwiftUI
 
 struct OrderDetailsPage: View {
     let order: OrderItem
-    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ScrollView {

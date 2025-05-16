@@ -5,7 +5,7 @@ struct CanteenifyApp: App {
     var body: some Scene {
         WindowGroup {
             HomePage()
-                .modelContainer(for: OrderItem.self)
         }
+        .modelContainer(for: OrderItem.self)
     }
 }
